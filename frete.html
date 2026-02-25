@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Frete</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 p-6 flex justify-center">
+
+    <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-truck text-blue-600"></i> Calcular Frete e Prazo
+        </h2>
+
+        <div class="flex gap-2 mb-4">
+            <input type="text" id="cepInput" placeholder="00000-000" maxlength="9"
+                class="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            <button onclick="calcularFrete()" id="btnCalcular"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
+                Calcular
+            </button>
+        </div>
+
+        <p id="localidade" class="text-sm text-gray-500 mb-4 hidden italic"></p>
+
+        <div id="resultado" class="space-y-3 hidden">
+            <hr class="my-4">
+            
+            <div class="border rounded-lg p-3 hover:border-blue-300 transition-colors cursor-pointer group">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="block font-bold text-gray-700">📦 Econômica (PAC)</span>
+                        <span class="text-sm text-gray-500 italic">Até 8 dias úteis</span>
+                    </div>
+                    <span class="text-green-600 font-bold">R$ 18,90</span>
+                </div>
+            </div>
+
+            <div class="border-2 border-blue-500 bg-blue-50 rounded-lg p-3 relative cursor-pointer">
+                <span class="absolute -top-3 right-3 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Melhor Escolha</span>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="block font-bold text-gray-700">⚡ Expressa (Sedex)</span>
+                        <span class="text-sm text-gray-500 italic">Até 2 dias úteis</span>
+                    </div>
+                    <span class="text-blue-600 font-bold">R$ 32,50</span>
+                </div>
+            </div>
+
+            <div class="border rounded-lg p-3 hover:border-blue-300 transition-colors cursor-pointer">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="block font-bold text-gray-700">🏬 Retirar na Loja</span>
+                        <span class="text-sm text-gray-500 italic">Pronto em 3 horas</span>
+                    </div>
+                    <span class="text-gray-700 font-bold uppercase text-sm">Grátis</span>
+                </div>
+            </div>
+        </div>
+
+        <p id="erro" class="text-red-500 text-sm mt-2 hidden text-center">CEP não encontrado ou inválido.</p>
+    </div>
+
+    <script>
+        async function calcularFrete() {
+            const cep = document.getElementById('cepInput').value.replace(/\D/g, '');
+            const resContainer = document.getElementById('resultado');
+            const locContainer = document.getElementById('localidade');
+            const erroMsg = document.getElementById('erro');
+            const btn = document.getElementById('btnCalcular');
+
+            if (cep.length !== 8) {
+                alert("Por favor, digite um CEP válido com 8 dígitos.");
+                return;
+            }
+
+            // UI Feedback
+            btn.innerText = "Buscando...";
+            resContainer.classList.add('hidden');
+            erroMsg.classList.add('hidden');
+
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
+
+                if (data.erro) throw new Error();
+
+                // Exibe localidade
+                locContainer.innerText = `Entrega para: ${data.localidade}, ${data.uf}`;
+                locContainer.classList.remove('hidden');
+
+                // Simula um delay de processamento para parecer real
+                setTimeout(() => {
+                    resContainer.classList.remove('hidden');
+                    btn.innerText = "Calcular";
+                }, 600);
+
+            } catch (error) {
+                erroMsg.classList.remove('hidden');
+                locContainer.classList.add('hidden');
+                btn.innerText = "Calcular";
+            }
+        }
+
+        // Máscara de CEP simples
+        document.getElementById('cepInput').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 5) {
+                value = value.slice(0, 5) + '-' + value.slice(5, 8);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>

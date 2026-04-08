@@ -3,114 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cálculo de Frete</title>
+    <title>Calculadora de Frete</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="tema.css">
 </head>
-<body class="bg-gray-100 p-6 flex justify-center">
+<body class="flex justify-center items-center min-h-screen p-4">
 
-    <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="fas fa-truck text-blue-600"></i> Calcular Frete e Prazo
-        </h2>
+    <div class="glass-ui p-8 rounded-[2rem] w-full max-w-md shadow-2xl text-white border border-slate-700" scale="auto">
+        <header class="text-center mb-10">
+            <div class="bg-indigo-500/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-location-crosshairs text-indigo-400 text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-black tracking-tight">Calculo prazo e data de entrega</h1>
+        </header>
 
-        <div class="flex gap-2 mb-4">
-            <input type="text" id="cepInput" placeholder="00000-000" maxlength="9"
-                class="flex-1 border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-            <button onclick="calcularFrete()" id="btnCalcular"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
-                Calcular
+        <button onclick="detectarLocalizacao()" id="btnLoc" class="w-full mb-8 bg-white text-slate-900 font-black py-4 rounded-2xl flex items-center justify-center gap-3 btn-animate shadow-xl">
+            <span id="locIcon">📍</span><span id="locText">Usar minha localizacao atual</span>
+        </button>
+
+        <form method="post" action="index.php?api=1" id="formMaster" class="space-y-5">
+            <input type="hidden" name="lat_user" id="lat_user">
+            <input type="hidden" name="lng_user" id="lng_user">
+            <input type="hidden" name="opcao_final" id="opcao_final">
+
+            <div>
+                <label class="text-[10px] font-black text-slate-500 uppercase ml-2 mb-2 block">CEP</label>
+                <input type="text" name="cep" id="cep" placeholder="00000-000 ou 00.000-000" maxlength="10" required
+                    class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 text-lg font-bold transition-all">
+            </div>
+
+            <div class="flex gap-3">
+                <div class="flex-1">
+                    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 mb-2 block">Cupom</label>
+                    <input type="text" name="cupom" placeholder="Insira o codigo do cupom"
+                        class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl outline-none uppercase text-sm font-bold">
+                </div>
+                <button type="submit" id="btnCalcular" class="bg-indigo-700 hover:bg-indigo-400 px-9 rounded-2xl font-black btn-animate shadow-lg shadow-indigo-900/40 flex items-center gap-2">
+                    CALCULAR
+                </button>
+            </div>
+        </form>
+
+        <div id="erroBox" class="mt-6 p-4 bg-red-500/10 border border-red-500/50 text-red-400 text-xs rounded-xl text-center font-bold hidden"></div>
+
+        <div id="resultadoBox" class="mt-10 hidden">
+            <div class="text-center mb-4">
+                <span id="infoBadge" class="bg-slate-800 text-slate-400 text-[9px] px-3 py-1 rounded-full font-black uppercase"></span>
+            </div>
+
+            <div id="listaOpcoes" class="space-y-3"></div>
+
+            <button id="btnCheckout" class="w-full mt-6 bg-emerald-500 py-5 rounded-3xl font-black hidden btn-animate shadow-xl shadow-emerald-900/30">
+                FINALIZAR SELECAO
             </button>
         </div>
-
-        <p id="localidade" class="text-sm text-gray-500 mb-4 hidden italic"></p>
-
-        <div id="resultado" class="space-y-3 hidden">
-            <hr class="my-4">
-            
-            <div class="border rounded-lg p-3 hover:border-blue-300 transition-colors cursor-pointer group">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <span class="block font-bold text-gray-700">📦 Econômica (PAC)</span>
-                        <span class="text-sm text-gray-500 italic">Até 8 dias úteis</span>
-                    </div>
-                    <span class="text-green-600 font-bold">R$ 18,90</span>
-                </div>
-            </div>
-
-            <div class="border-2 border-blue-500 bg-blue-50 rounded-lg p-3 relative cursor-pointer">
-                <span class="absolute -top-3 right-3 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Melhor Escolha</span>
-                <div class="flex justify-between items-center">
-                    <div>
-                        <span class="block font-bold text-gray-700">⚡ Expressa (Sedex)</span>
-                        <span class="text-sm text-gray-500 italic">Até 2 dias úteis</span>
-                    </div>
-                    <span class="text-blue-600 font-bold">R$ 32,50</span>
-                </div>
-            </div>
-
-            <div class="border rounded-lg p-3 hover:border-blue-300 transition-colors cursor-pointer">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <span class="block font-bold text-gray-700">🏬 Retirar na Loja</span>
-                        <span class="text-sm text-gray-500 italic">Pronto em 3 horas</span>
-                    </div>
-                    <span class="text-gray-700 font-bold uppercase text-sm">Grátis</span>
-                </div>
-            </div>
-        </div>
-
-        <p id="erro" class="text-red-500 text-sm mt-2 hidden text-center">CEP não encontrado ou inválido.</p>
     </div>
 
     <script>
-        async function calcularFrete() {
-            const cep = document.getElementById('cepInput').value.replace(/\D/g, '');
-            const resContainer = document.getElementById('resultado');
-            const locContainer = document.getElementById('localidade');
-            const erroMsg = document.getElementById('erro');
-            const btn = document.getElementById('btnCalcular');
+        const form = document.getElementById('formMaster');
+        const cepInput = document.getElementById('cep');
+        const btnCalcular = document.getElementById('btnCalcular');
+        const erroBox = document.getElementById('erroBox');
+        const resultadoBox = document.getElementById('resultadoBox');
+        const infoBadge = document.getElementById('infoBadge');
+        const listaOpcoes = document.getElementById('listaOpcoes');
+        const btnCheckout = document.getElementById('btnCheckout');
+        const apiUrl = resolverApiUrl();
 
-            if (cep.length !== 8) {
-                alert("Por favor, digite um CEP válido com 8 dígitos.");
-                return;
+        function resolverApiUrl() {
+            const actionPadrao = form.getAttribute('action') || 'index.php?api=1';
+
+            // Fluxo normal: pagina servida por HTTP(S), usa caminho relativo.
+            if (window.location.protocol !== 'file:') {
+                return new URL(actionPadrao, window.location.href).toString();
             }
 
-            // UI Feedback
-            btn.innerText = "Buscando...";
-            resContainer.classList.add('hidden');
-            erroMsg.classList.add('hidden');
-
-            try {
-                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                const data = await response.json();
-
-                if (data.erro) throw new Error();
-
-                // Exibe localidade
-                locContainer.innerText = `Entrega para: ${data.localidade}, ${data.uf}`;
-                locContainer.classList.remove('hidden');
-
-                // Simula um delay de processamento para parecer real
-                setTimeout(() => {
-                    resContainer.classList.remove('hidden');
-                    btn.innerText = "Calcular";
-                }, 600);
-
-            } catch (error) {
-                erroMsg.classList.remove('hidden');
-                locContainer.classList.add('hidden');
-                btn.innerText = "Calcular";
+            // Fallback para abertura direta de arquivo local no XAMPP.
+            const caminho = decodeURIComponent(window.location.pathname).replace(/\\/g, '/');
+            const marcador = '/xampp/htdocs/';
+            const pos = caminho.toLowerCase().indexOf(marcador);
+            if (pos >= 0) {
+                const relativo = caminho.slice(pos + marcador.length).replace(/\/[^/]*$/, '');
+                return `http://localhost/${relativo}/index.php?api=1`;
             }
+
+            return actionPadrao;
         }
 
-        // Máscara de CEP simples
-        document.getElementById('cepInput').addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 5) {
-                value = value.slice(0, 5) + '-' + value.slice(5, 8);
+        function escapeHtml(texto) {
+            return String(texto)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function normalizarCep(valor) {
+            const digitos = String(valor).replace(/\D/g, '').slice(0, 8);
+            if (digitos.length > 5) {
+                return `${digitos.slice(0, 5)}-${digitos.slice(5)}`;
             }
-            e.target.value = value;
+            return digitos;
+        }
+
+        function limparErro() {
+            erroBox.textContent = '';
+            erroBox.classList.add('hidden');
+        }
+
+        function mostrarErro(mensagem) {
+            erroBox.textContent = mensagem;
+            erroBox.classList.remove('hidden');
+            resultadoBox.classList.add('hidden');
+        }
+
+        function selecionarFrete(el, id) {
+            document.querySelectorAll('.shipping-card').forEach((c) => c.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('opcao_final').value = id;
+            btnCheckout.classList.remove('hidden');
+        }
+
+        function renderResultado(resultado) {
+            infoBadge.textContent = resultado.info || '';
+
+            listaOpcoes.innerHTML = (resultado.opcoes || []).map((opcao) => `
+                <div onclick="selecionarFrete(this, '${escapeHtml(opcao.id)}')"
+                     class="shipping-card border border-slate-700 p-5 rounded-3xl cursor-pointer flex justify-between items-center transition-all hover:border-slate-500">
+                    <div>
+                        <p class="font-black text-slate-100">${escapeHtml(opcao.nome)}</p>
+                        <p class="text-[10px] text-slate-400 font-bold mt-1 tracking-wider uppercase">Entrega em: ${escapeHtml(opcao.entrega)}</p>
+                    </div>
+                    <span class="font-black text-indigo-400 text-lg">${escapeHtml(opcao.valor)}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('opcao_final').value = '';
+            btnCheckout.classList.add('hidden');
+            resultadoBox.classList.remove('hidden');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            limparErro();
+            cepInput.value = normalizarCep(cepInput.value);
+
+            const textoOriginal = btnCalcular.textContent;
+            btnCalcular.disabled = true;
+            btnCalcular.textContent = 'CALCULANDO...';
+
+            try {
+                const resposta = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: new FormData(form)
+                });
+
+                if (!resposta.ok) {
+                    throw new Error('Falha ao calcular frete.');
+                }
+
+                const tipoResposta = (resposta.headers.get('content-type') || '').toLowerCase();
+                if (!tipoResposta.includes('application/json')) {
+                    throw new Error('A API nao retornou JSON.');
+                }
+
+                const payload = await resposta.json();
+
+                if (!payload.ok) {
+                    mostrarErro(payload.erro || 'Nao foi possivel calcular o frete.');
+                    return;
+                }
+
+                renderResultado(payload.resultado || {});
+            } catch (erro) {
+                if (window.location.protocol === 'file:') {
+                    mostrarErro('Abra esta pagina pelo servidor (ex: http://localhost/...) para executar o PHP.');
+                } else {
+                    mostrarErro('Erro de conexao com o calculo de frete. Verifique o caminho da API e tente novamente.');
+                }
+            } finally {
+                btnCalcular.disabled = false;
+                btnCalcular.textContent = textoOriginal;
+            }
+        });
+
+        async function detectarLocalizacao() {
+            const btn = document.getElementById('btnLoc');
+            const text = document.getElementById('locText');
+
+            if (!navigator.geolocation) {
+                alert('Erro: GPS indisponivel.');
+                return;
+            }
+            
+            else if (navigator.permissions) {
+                try {
+                    const perm = await navigator.permissions.query({ name: 'geolocation' });
+                    if (perm.state === 'denied') {
+                        alert('Erro: Acesso ao GPS negado. Por favor, permita o acesso ou insira o CEP manualmente.');
+                        return;
+                    }
+                } catch (e) {
+                    // Permissões podem não ser suportadas, continuar para tentar obter localização.
+                }
+            }
+
+            text.innerText = 'LOCALIZANDO...';
+            btn.classList.add('opacity-50');
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                document.getElementById('lat_user').value = lat;
+                document.getElementById('lng_user').value = lng;
+
+                try {
+                    const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                    const data = await resp.json();
+
+                    if (data.address && data.address.postcode) {
+                        const rawCep = data.address.postcode.replace(/\D/g, '');
+                        document.getElementById('cep').value = rawCep.slice(0, 5) + '-' + rawCep.slice(5, 8);
+                        setTimeout(() => form.requestSubmit(), 600);
+                    }
+                } catch (e) {
+                    text.innerText = 'GPS ATIVO (CEP MANUAL)';
+                }
+            }, () => {
+                text.innerText = 'ACESSO NEGADO';
+                btn.classList.remove('opacity-50');
+            });
+        }
+
+        cepInput.addEventListener('input', (e) => {
+            e.target.value = normalizarCep(e.target.value);
         });
     </script>
 </body>

@@ -1,0 +1,140 @@
+:root {
+    --bg-deep: #07131f;
+    --bg-mid: #0f2235;
+    --bg-soft: #183650;
+    --card: rgba(8, 21, 34, 0.72);
+    --card-border: rgba(120, 164, 205, 0.28);
+    --text: #eaf6ff;
+    --muted: #a7c5de;
+    --accent: #31c8ff;
+    --accent-2: #5bf5c0;
+    --danger: #ff7676;
+    --shadow: rgba(0, 10, 20, 0.45);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", sans-serif;
+    background:
+        radial-gradient(circle at 12% 14%, rgba(49, 200, 255, 0.22), transparent 35%),
+        radial-gradient(circle at 88% 18%, rgba(91, 245, 192, 0.2), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(10, 30, 50, 0.85), transparent 55%),
+        linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-mid) 48%, var(--bg-soft) 100%);
+}
+
+.glass-ui {
+    position: relative;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--card-border) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 24px 64px -26px var(--shadow);
+}
+
+.glass-ui::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(125deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0));
+}
+
+label {
+    color: var(--muted) !important;
+    letter-spacing: 0.08em;
+}
+
+input[type="text"] {
+    color: var(--text) !important;
+    border-color: rgba(120, 164, 205, 0.35) !important;
+    background: rgba(9, 24, 39, 0.72) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+input[type="text"]::placeholder {
+    color: rgba(167, 197, 222, 0.62);
+}
+
+input[type="text"]:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(49, 200, 255, 0.24);
+    transform: translateY(-1px);
+}
+
+button[type="submit"],
+#btnCheckout {
+    border: none;
+    color: #04101b;
+    background: linear-gradient(118deg, var(--accent) 0%, var(--accent-2) 100%) !important;
+    box-shadow: 0 16px 30px -16px rgba(49, 200, 255, 0.7) !important;
+}
+
+#btnLoc {
+    border: 1px solid rgba(120, 164, 205, 0.35);
+    background: rgba(231, 247, 255, 0.96) !important;
+    color: #07213a !important;
+}
+
+.btn-animate {
+    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-animate:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.03);
+}
+
+.btn-animate:active {
+    transform: translateY(0);
+}
+
+.shipping-card {
+    background: rgba(8, 22, 35, 0.65);
+    border-color: rgba(120, 164, 205, 0.35) !important;
+    transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.shipping-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(91, 245, 192, 0.68) !important;
+    background: rgba(12, 28, 43, 0.85);
+}
+
+.shipping-card.selected {
+    border-color: var(--accent-2) !important;
+    background: linear-gradient(145deg, rgba(16, 52, 69, 0.95), rgba(10, 32, 50, 0.95));
+    box-shadow: 0 0 0 1px rgba(91, 245, 192, 0.45), 0 16px 30px -22px rgba(91, 245, 192, 0.88);
+}
+
+.shipping-card span {
+    color: #8ee9ff !important;
+}
+
+.text-red-400 {
+    color: var(--danger) !important;
+}
+
+@media (max-width: 640px) {
+    .glass-ui {
+        border-radius: 1.35rem !important;
+        padding: 1.2rem !important;
+    }
+
+    h1 {
+        font-size: 1.35rem !important;
+        line-height: 1.2;
+    }
+
+    #btnLoc,
+    button[type="submit"],
+    #btnCheckout {
+        min-height: 52px;
+    }
+}
